@@ -1,0 +1,10 @@
+streamlit
+langchain
+pypdf2
+openai
+chromadb
+tiktoken
+python-dotenv
+feedparser
+selenium
+unstructured

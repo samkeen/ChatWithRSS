@@ -1,6 +1,6 @@
 
 import feedparser
-
+from chatwithrss.page_reader import PageReader
 
 
 class RssReader:
@@ -15,22 +15,13 @@ class RssReader:
         return feed
     
 
-    def parse_feed(self) -> list[feedparser.FeedParserDict]:
+    def parse_feed(self, limit: int = 1000, append_content: bool = False) -> list[feedparser.FeedParserDict]:
         feed = self._get_feed()
+        feed.entries = feed.entries[:limit] # type: ignore
+        if append_content:
+            # append the page content to the feed entries
+            pages_content = PageReader.read([str(entry.link) for entry in feed.entries])
+            for entry, page_content in zip(feed.entries, pages_content):
+                entry['page_content'] = page_content['page_content']
         return feed.entries
 
-    
-if __name__ == "__main__":
-    from page_reader import PageReader
-    reader = RssReader("https://aws.amazon.com/about-aws/whats-new/recent/feed/")
-    feed_entries = reader.parse_feed()
-    
-    links = [str(entry.link) for entry in feed_entries]
-    page_content = PageReader.read(links)
-    # create a file
-    with open("rss_content.txt", "w") as f:
-        f.write("```\n")
-        for doc in page_content:
-            f.write(doc)
-            f.write("\n```")
-            f.write("\n")

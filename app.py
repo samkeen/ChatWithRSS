@@ -70,6 +70,10 @@ def process_file(file):
 
   # Create a Chroma vector store
   embeddings = OpenAIEmbeddings()
+
+
+
+
   st.session_state.doc_search = Chroma.from_texts(chunks, embeddings, metadatas=metadatas)
   
 

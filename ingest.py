@@ -1,31 +1,21 @@
-from chatwithrss.rss_reader import RssReader
+from chat_with_rss.rss_reader import RssReader
 from dotenv import load_dotenv
-from chatwithrss.docs_db import DocsDb
+from chat_with_rss.feed_persister import FeedPersister
+from pathlib import Path
 # read ENV variables
 load_dotenv()
 
 # set logging level
 import logging
-logging.basicConfig(level=logging.INFO)
-# set logging level to debug only for chatwithrss
-logging.getLogger("chatwithrss").setLevel(logging.DEBUG)
+# Set global logging to ERROR, then set the logging level for chatwithrss to DEBUG
+logging.basicConfig(level=logging.ERROR)
+logging.getLogger("chat_with_rss").setLevel(logging.DEBUG)
 
 
 # Get all the entries in the RSS feed
 rss_reader = RssReader("https://aws.amazon.com/about-aws/whats-new/recent/feed/")
-feed_entries = rss_reader.parse_feed(append_content=True, limit=20)
-
-# pretty print the first entry
-import pprint  
-pp = pprint.PrettyPrinter(indent=4)
-# pp.pprint(feed_entries[0])
+feed_entries = rss_reader.parse_feed(limit=1000)
 
 # Ingest each entry into the vector store
-
-docs_db = DocsDb(metadata_fields=["link", "id"])
+docs_db = FeedPersister(Path().joinpath(".chromadb"), metadata_fields=["link", "id", "published"])
 docs_db.ingest(feed_entries)
-
-search_results = docs_db.search("lambda")
-
-# pretty print the search results
-pp.pprint(search_results)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
@@ -132,7 +133,7 @@ class FeedPersister:
             dict_results.append(result_item)
         return dict_results
 
-    def _load_persisted_ids(self) -> list[dict[str, str]]:
+    def _load_persisted_ids(self) -> list[dict[str, Any]]:
         """
         Get the list of ids that have been persisted to the vector store.
         This is so we can filter out documents that have already been indexed when ingesting new documents.

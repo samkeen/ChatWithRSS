@@ -36,7 +36,7 @@ class FeedPersister:
         )
         # the fields of the document that will be used as metadata
         self.metadata_fields = metadata_fields
-        # intanciate the OpenAI embeddings model
+        # instantiate the OpenAI embeddings model
         self.embeddings = OpenAIEmbeddings()  # type: ignore
         self.persist_dir_path = persist_dir_path
         self.db = None
@@ -60,7 +60,7 @@ class FeedPersister:
         existing_persisted_items = self._load_persisted_ids()
         existing_ids = [item["id"] for item in existing_persisted_items]
         # build the metadata for each document
-        self._contruct_metadata(rss_documents, db_documents, items_to_persist, existing_ids)
+        self._construct_metadata(rss_documents, db_documents, items_to_persist, existing_ids)
         # ingest the documents into the datastore
         if db_documents:
             self._add_page_content(db_documents)
@@ -79,6 +79,7 @@ class FeedPersister:
             persist_directory=str(self.persist_dir_path.absolute()),
         )
         log.info(f"Ingested {len(rss_documents)} documents")
+        # Save to disk
         vector_db.persist()
         existing_persisted_items.extend(items_to_persist)
         log.info(f"Total persisted items coumnt: {len(existing_persisted_items)}")
@@ -89,7 +90,7 @@ class FeedPersister:
         for db_document, page_content in zip(db_documents, pages_content):
             db_document.page_content = page_content["page_content"]
 
-    def _contruct_metadata(self, rss_documents, db_documents, items_to_persist, existing_ids):
+    def _construct_metadata(self, rss_documents, db_documents, items_to_persist, existing_ids):
         for rss_document in rss_documents:
             # Build the metadata dictionary
             metadata = {

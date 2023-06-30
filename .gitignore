@@ -162,3 +162,6 @@ cython_debug/
 /.chroma/
 /.chromadb/
 /.vscode/
+
+# OSX!
+.DS_Store

@@ -13,6 +13,7 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10
 env_loaded = load_dotenv()
 api_key_added = os.getenv("OPENAI_API_KEY", "").strip() != ""
 CHROMA_K_VALUE = int(os.getenv("CHROMA_K_VALUE", 4))
+OPENAI_MODEL = os.getenv("OPENAI_MODEL")
 
 
 def main():
@@ -29,7 +30,7 @@ def main():
   if user_question:
     docs = st.session_state.doc_search.similarity_search(user_question, k=CHROMA_K_VALUE)
     
-    llm = OpenAI() # type: ignore
+    llm = OpenAI(model=OPENAI_MODEL) # type: ignore
     chain = load_qa_chain(llm, chain_type="stuff")
     with get_openai_callback() as cb:
       response = chain.run(input_documents=docs, question=user_question)

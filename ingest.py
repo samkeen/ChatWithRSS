@@ -7,7 +7,7 @@ from pathlib import Path
 load_dotenv()
 
 FEED_URL = os.getenv("FEED_URL")
-FEED_ITEMS_LIMIT = os.getenv("FEED_ITEMS_LIMIT", 50)
+FEED_ITEMS_LIMIT = os.getenv("FEED_ITEMS_LIMIT")
 if not FEED_URL:
     exit("No FEED_URL provided in .env file")
 if not FEED_ITEMS_LIMIT:

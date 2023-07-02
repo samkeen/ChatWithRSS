@@ -86,7 +86,7 @@ class FeedPersister:
         self._write_persisted_ids(existing_persisted_items)
 
     def _add_page_content(self, db_documents: list[Document]) -> None:
-        pages_content = PageReader.read([doc.metadata.get("link") for doc in db_documents])
+        pages_content = PageReader.read([str(doc.metadata.get("link")) for doc in db_documents])
         for db_document, page_content in zip(db_documents, pages_content):
             db_document.page_content = page_content["page_content"]
 

@@ -3,9 +3,10 @@ import streamlit as st
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.callbacks import get_openai_callback
+from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -30,13 +31,27 @@ def main():
   if user_question:
     docs = st.session_state.doc_search.similarity_search(user_question, k=CHROMA_K_VALUE)
     
-    llm = OpenAI(model=OPENAI_MODEL) # type: ignore
+    llm=ChatOpenAI(
+          temperature=0,
+          model=OPENAI_MODEL, 
+      ) # type: ignore
+
+
+    template = "respond as succinctly as possible. {query}?"
+
+    prompt = PromptTemplate(
+        input_variables=["query"],
+        template=template,
+    )
+
+
     chain = load_qa_chain(llm, chain_type="stuff")
     with get_openai_callback() as cb:
-      response = chain.run(input_documents=docs, question=user_question)
+      response = chain.run(input_documents=docs, question=prompt.format(query=user_question))
       print(cb)
         
     st.write(response)
+
 
 def load_db():
   # Create a Chroma vector store

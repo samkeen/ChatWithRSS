@@ -15,6 +15,7 @@ env_loaded = load_dotenv()
 api_key_added = os.getenv("OPENAI_API_KEY", "").strip() != ""
 CHROMA_K_VALUE = int(os.getenv("CHROMA_K_VALUE", 4))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL")
+OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", 0.0))
 
 
 def main():
@@ -32,7 +33,7 @@ def main():
     docs = st.session_state.doc_search.similarity_search(user_question, k=CHROMA_K_VALUE)
     
     llm=ChatOpenAI(
-          temperature=0,
+          temperature=OPENAI_TEMPERATURE,
           model=OPENAI_MODEL, 
       ) # type: ignore
 

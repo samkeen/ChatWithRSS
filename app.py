@@ -49,10 +49,13 @@ def main():
       ) # type: ignore
 
 
-    # Form the prompt template we will send to the LLM 
-    template = "respond as succinctly as possible. {query}?"
+    template = """Use the following pieces of context to answer the users question. 
+    If you don't know the answer, just say that you don't know, don't try to make up an answer.
+    ----------------
+    {context}"""
+
     prompt = PromptTemplate(
-        input_variables=["query"],
+        input_variables=["context"],
         template=template,
     )
 
@@ -60,15 +63,13 @@ def main():
     # Instantiate a Question/Answer Langchain chain.
     # The 'stuff' chain type is the simplest method, whereby you simply stuff all the 
     #   related data into the prompt as context to pass to the language model.
-    chain = load_qa_chain(llm, chain_type="stuff")
-
-
+    chain = load_qa_chain(llm, chain_type="stuff", verbose=True, prompt=prompt)
     # Run the chain and collect the response.
     # Use 'with' context to track token usage
     #   see: https://python.langchain.com/docs/modules/model_io/models/llms/how_to/token_usage_tracking
     with get_openai_callback() as cb:
-      response = chain.run(input_documents=docs, question=prompt.format(query=user_question))
-      print(cb)
+      response = chain.run(input_documents=docs, question=user_question, return_only_outputs=False, include_outputs=True)
+      print(cb.total_tokens)
         
 
     # Display the result to the user    

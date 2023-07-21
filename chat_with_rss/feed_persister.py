@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Any
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
@@ -56,7 +55,7 @@ class FeedPersister:
         if not rss_documents:
             log.info(f"RSS documents list is empty. Nothing to ingest.")
             return
-        items_to_persist = []
+        items_to_persist: list[dict[str, Any]] = []
         existing_persisted_items = self._load_persisted_ids()
         existing_ids = [item["id"] for item in existing_persisted_items]
         # build the metadata for each document

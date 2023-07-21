@@ -6,7 +6,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.callbacks import get_openai_callback
-from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -28,7 +28,7 @@ def main():
 
   # Load the vector db store is not loaded, place it in session memory
   if "doc_search" not in st.session_state:
-      load_db()
+    load_db()
 
 
   # Prompt the user for their question
@@ -49,28 +49,44 @@ def main():
       ) # type: ignore
 
 
-    template = """Use the following pieces of context to answer the users question. 
-    If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    ----------------
-    {context}"""
+    # Form the prompt template we will send to the LLM
+    # Borrowed this from
+    # .venv/lib/python3.9/site-packages/langchain/chains/question_answering/stuff_prompt.py
+    system_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
-    prompt = PromptTemplate(
-        input_variables=["context"],
-        template=template,
-    )
+    {context}
+
+    Question: {question}
+    Helpful Answer:"""
+    messages = [
+        SystemMessagePromptTemplate.from_template(system_template),
+        HumanMessagePromptTemplate.from_template("{question}"),
+    ]
+    chat_prompt = ChatPromptTemplate.from_messages(messages)
 
 
     # Instantiate a Question/Answer Langchain chain.
     # The 'stuff' chain type is the simplest method, whereby you simply stuff all the 
     #   related data into the prompt as context to pass to the language model.
-    chain = load_qa_chain(llm, chain_type="stuff", verbose=True, prompt=prompt)
+    chain = load_qa_chain(llm, chain_type="stuff", verbose=True, prompt=chat_prompt)
+    prompt_token_length = chain.prompt_length(docs, question=user_question)
+    # TODO for now just stop, fix is being worked on here: https://github.com/DevThinkAI/ChatWithRSS/issues/2
+    if prompt_token_length and prompt_token_length > 16000:
+      st.error(f"Prompt token length is too long: {prompt_token_length} for this model.")
+      return
+
+
     # Run the chain and collect the response.
     # Use 'with' context to track token usage
     #   see: https://python.langchain.com/docs/modules/model_io/models/llms/how_to/token_usage_tracking
     with get_openai_callback() as cb:
       response = chain.run(input_documents=docs, question=user_question, return_only_outputs=False, include_outputs=True)
-      print(cb.total_tokens)
-        
+
+
+    # output some metadata
+    st.markdown(f"Found {len(docs)} similar documents in vector store.\n\nUsing OpenAI model: {OPENAI_MODEL}, with temperature: {OPENAI_TEMPERATURE}\n\nPrompt token length: {prompt_token_length}") 
+    st.code(f"{cb}")
+
 
     # Display the result to the user    
     st.write(response)

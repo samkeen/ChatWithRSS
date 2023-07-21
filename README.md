@@ -36,3 +36,6 @@ You can now view your Streamlit app in your browser.
 
 Local URL: http://localhost:8501
 ```
+
+### Want to learn more?
+My [weekly newsletter](https://devthinkai.beehiiv.com/) will keep you informed on Generative AI topics important to software developers (without all the hype)
